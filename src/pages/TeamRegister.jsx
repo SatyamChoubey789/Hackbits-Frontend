@@ -8,7 +8,7 @@ const TeamRegister = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     teamName: '',
-    teamSize: 'Solo', // Only "Solo" option remains
+    teamSize: 'Solo',
     problemStatement: '',
     members: []
   });
@@ -27,12 +27,10 @@ const TeamRegister = () => {
     try {
       const response = await api.get('/teams/my-team');
       if (response.data.team) {
-        // Team already exists, redirect to team details
         navigate('/team-details');
         return;
       }
     } catch (error) {
-      // No team found or error, continue with registration
       console.log('No existing team found, proceeding with registration');
     } finally {
       setCheckingTeam(false);
@@ -56,9 +54,98 @@ const TeamRegister = () => {
     });
 
     // Reset members when team size changes
-    if (name === 'teamSize' && value === 'Solo') {
-      setFormData(prev => ({ ...prev, members: [] }));
+    if (name === 'teamSize') {
+      let newMembers = [];
+      if (value === 'Duo') {
+        newMembers = [{ email: '', registrationNumber: '' }];
+      } else if (value === 'Team') {
+        newMembers = [
+          { email: '', registrationNumber: '' },
+          { email: '', registrationNumber: '' }
+        ];
+      }
+      setFormData(prev => ({ ...prev, members: newMembers }));
     }
+  };
+
+  const handleMemberChange = (index, field, value) => {
+    const newMembers = [...formData.members];
+    newMembers[index][field] = value;
+    setFormData({ ...formData, members: newMembers });
+  };
+
+  const addMember = () => {
+    if (formData.members.length < 3) {
+      setFormData({
+        ...formData,
+        members: [...formData.members, { email: '', registrationNumber: '' }]
+      });
+    }
+  };
+
+  const removeMember = (index) => {
+    const newMembers = formData.members.filter((_, i) => i !== index);
+    setFormData({ ...formData, members: newMembers });
+  };
+
+  const validateForm = () => {
+    if (!formData.teamName.trim()) {
+      setError('Team name is required');
+      return false;
+    }
+
+    if (!formData.problemStatement) {
+      setError('Please select a problem statement');
+      return false;
+    }
+
+    if (formData.teamSize === 'Duo' && formData.members.length !== 1) {
+      setError('Duo teams must have exactly 1 additional member');
+      return false;
+    }
+
+    if (formData.teamSize === 'Team' && (formData.members.length < 2 || formData.members.length > 3)) {
+      setError('Squad teams must have 2-3 additional members');
+      return false;
+    }
+
+    // Validate member details
+    for (let i = 0; i < formData.members.length; i++) {
+      const member = formData.members[i];
+      if (!member.email.trim() || !member.registrationNumber.trim()) {
+        setError(`Please fill in all details for member ${i + 1}`);
+        return false;
+      }
+      
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(member.email)) {
+        setError(`Invalid email format for member ${i + 1}`);
+        return false;
+      }
+
+      // Check if member is trying to add themselves
+      if (member.email === user?.email || member.registrationNumber === user?.registrationNumber) {
+        setError('You cannot add yourself as a team member');
+        return false;
+      }
+    }
+
+    // Check for duplicate members
+    const emails = formData.members.map(m => m.email);
+    const regNumbers = formData.members.map(m => m.registrationNumber);
+    
+    if (new Set(emails).size !== emails.length) {
+      setError('Duplicate member emails detected');
+      return false;
+    }
+    
+    if (new Set(regNumbers).size !== regNumbers.length) {
+      setError('Duplicate registration numbers detected');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -67,27 +154,22 @@ const TeamRegister = () => {
     setError('');
     setSuccess('');
 
-    try {
-      // Validate the form
-      const validMembers = [];
-      if (formData.teamSize === 'Solo') {
-        validMembers.push({
-          email: user?.email,
-          registrationNumber: user?.registrationNumber
-        });
-      }
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
 
+    try {
       const teamData = {
         teamName: formData.teamName,
         teamSize: formData.teamSize,
         problemStatement: formData.problemStatement,
-        members: validMembers
+        members: formData.teamSize === 'Solo' ? [] : formData.members
       };
 
       const response = await api.post('/teams/register', teamData);
       setSuccess('Team registered successfully! Redirecting to team details...');
       
-      // Redirect to team details after 2 seconds
       setTimeout(() => {
         navigate('/team-details');
       }, 2000);
@@ -100,6 +182,19 @@ const TeamRegister = () => {
     }
 
     setLoading(false);
+  };
+
+  const getTeamSizeInfo = () => {
+    switch (formData.teamSize) {
+      case 'Solo':
+        return 'Individual participation - just you!';
+      case 'Duo':
+        return 'Team of 2 - you + 1 member';
+      case 'Team':
+        return 'Squad of 3-4 - you + 2-3 members';
+      default:
+        return '';
+    }
   };
 
   if (checkingTeam) {
@@ -178,8 +273,80 @@ const TeamRegister = () => {
                 onChange={handleChange}
               >
                 <option value="Solo">Solo (1 member)</option>
+                <option value="Duo">Duo (2 members)</option>
+                <option value="Team">Squad (3-4 members)</option>
               </select>
+              <p className="mt-2 text-sm text-gray-600">{getTeamSizeInfo()}</p>
             </div>
+
+            {/* Team Members Section */}
+            {formData.teamSize !== 'Solo' && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
+                  {formData.teamSize === 'Team' && formData.members.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={addMember}
+                      className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                    >
+                      + Add Member
+                    </button>
+                  )}
+                </div>
+
+                {formData.members.map((member, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium text-gray-900">Member {index + 1}</h4>
+                      {formData.teamSize === 'Team' && formData.members.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => removeMember(index)}
+                          className="text-red-600 hover:text-red-700 text-sm"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        className="input-field"
+                        placeholder="member@example.com"
+                        value={member.email}
+                        onChange={(e) => handleMemberChange(index, 'email', e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Registration Number *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        className="input-field"
+                        placeholder="Enter registration number"
+                        value={member.registrationNumber}
+                        onChange={(e) => handleMemberChange(index, 'registrationNumber', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-md">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> All team members must be registered on the platform with the same email and registration number provided here.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Problem Statement */}
             <div>
