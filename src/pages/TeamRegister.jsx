@@ -2,32 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
+import toast from 'react-hot-toast';
 
 const TeamRegister = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    teamName: ''
-  });
-
+  const [formData, setFormData] = useState({ teamName: '' });
   const [loading, setLoading] = useState(false);
   const [checkingTeam, setCheckingTeam] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     checkExistingTeam();
   }, []);
 
-  // Check if user already registered a team
+  // ✅ Check if user already registered a team
   const checkExistingTeam = async () => {
     try {
       const response = await api.get('/teams/my-team');
       if (response.data.team) {
+        toast.success('You already have a registered team!');
         navigate('/team-details');
         return;
       }
-    } catch (error) {
+    } catch {
       console.log('No existing team found, proceeding with registration');
     } finally {
       setCheckingTeam(false);
@@ -36,15 +34,12 @@ const TeamRegister = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
   const validateForm = () => {
     if (!formData.teamName.trim()) {
-      setError('Team name is required');
+      toast.error('Team name is required');
       return false;
     }
     return true;
@@ -53,7 +48,6 @@ const TeamRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     if (!validateForm()) {
       setLoading(false);
@@ -64,12 +58,11 @@ const TeamRegister = () => {
       const teamData = {
         teamName: formData.teamName,
         teamSize: 'Solo',
-        members: []
+        members: [],
       };
 
-      const response = await api.post('/teams/register', teamData);
-      
-      // Redirect to team details to complete payment
+      await api.post('/teams/register', teamData);
+      toast.success('Team registered successfully! Proceeding to payment...');
       navigate('/team-details');
     } catch (error) {
       console.error('Team registration error:', error);
@@ -77,10 +70,10 @@ const TeamRegister = () => {
         error.response?.data?.message ||
         error.response?.data?.errors?.join(', ') ||
         'Failed to register team';
-      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   if (checkingTeam) {
@@ -107,20 +100,19 @@ const TeamRegister = () => {
         </div>
 
         <div className="card">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-6">
-              {error}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* User Info */}
             <div className="bg-primary-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-primary-800 mb-2">Participant</h3>
+              <h3 className="text-lg font-semibold text-primary-800 mb-2">
+                Participant
+              </h3>
               <p className="text-primary-700">
-                <strong>Name:</strong> {user?.name}<br />
-                <strong>Email:</strong> {user?.email}<br />
-                <strong>Registration Number:</strong> {user?.registrationNumber}
+                <strong>Name:</strong> {user?.name}
+                <br />
+                <strong>Email:</strong> {user?.email}
+                <br />
+                <strong>Registration Number:</strong>{' '}
+                {user?.registrationNumber}
               </p>
             </div>
 
