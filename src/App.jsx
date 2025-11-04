@@ -22,6 +22,7 @@ import Profile from "./pages/Profile";
 import About from "./pages/About";
 import ProblemStatements from "./pages/ProblemStatements";
 import Sponsors from "./pages/Sponsors";
+import QRScanner from "./pages/QRScanner";
 
 function App() {
   return (
