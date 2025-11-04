@@ -12,6 +12,7 @@ const QRScanner = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [processingCheckIn, setProcessingCheckIn] = useState(false);
+  const [cameraPermission, setCameraPermission] = useState(null);
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
 
@@ -19,12 +20,36 @@ const QRScanner = () => {
     checkAuth();
     fetchStats();
     fetchHistory();
+    checkCameraPermission();
   }, []);
 
   const checkAuth = () => {
     const adminToken = localStorage.getItem('adminToken');
     if (!adminToken) {
       window.location.href = '/admin/login';
+    }
+  };
+
+  const checkCameraPermission = async () => {
+    try {
+      // Check if we're on HTTPS or localhost
+      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        setError('Camera access requires HTTPS connection');
+        return;
+      }
+
+      // Try to get camera permission
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop()); // Stop the stream immediately
+      setCameraPermission('granted');
+    } catch (err) {
+      console.error('Camera permission error:', err);
+      setCameraPermission('denied');
+      if (err.name === 'NotAllowedError') {
+        setError('Camera permission denied. Please allow camera access in your browser settings.');
+      } else if (err.name === 'NotFoundError') {
+        setError('No camera found on this device.');
+      }
     }
   };
 
@@ -46,35 +71,67 @@ const QRScanner = () => {
     }
   };
 
-  const startScanner = () => {
+  const startScanner = async () => {
     setIsScanning(true);
     setError(null);
     setScanResult(null);
     setCheckInStatus(null);
 
+    // Clear any existing scanner
     if (html5QrcodeScannerRef.current) {
-      html5QrcodeScannerRef.current.clear();
+      try {
+        await html5QrcodeScannerRef.current.clear();
+      } catch (err) {
+        console.log('Error clearing scanner:', err);
+      }
     }
 
-    const scanner = new Html5QrcodeScanner(
-      "qr-reader",
-      { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 },
+    try {
+      // Mobile-optimized configuration
+      const config = {
+        fps: 10,
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+          // Make QR box responsive to screen size
+          const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+          const qrboxSize = Math.floor(minEdgeSize * 0.7);
+          return {
+            width: qrboxSize,
+            height: qrboxSize
+          };
+        },
         aspectRatio: 1.0,
-        formatsToSupport: ['QR_CODE']
-      },
-      false
-    );
+        formatsToSupport: ['QR_CODE'],
+        // Mobile-specific settings
+        showTorchButtonIfSupported: true, // Show flashlight button on mobile
+        videoConstraints: {
+          facingMode: { ideal: "environment" } // Use back camera on mobile
+        }
+      };
 
-    scanner.render(onScanSuccess, onScanFailure);
-    html5QrcodeScannerRef.current = scanner;
+      const scanner = new Html5QrcodeScanner(
+        "qr-reader",
+        config,
+        /* verbose= */ false
+      );
+
+      scanner.render(onScanSuccess, onScanFailure);
+      html5QrcodeScannerRef.current = scanner;
+
+    } catch (err) {
+      console.error('Scanner initialization error:', err);
+      setError(`Failed to start scanner: ${err.message}`);
+      setIsScanning(false);
+    }
   };
 
-  const stopScanner = () => {
+  const stopScanner = async () => {
     if (html5QrcodeScannerRef.current) {
-      html5QrcodeScannerRef.current.clear();
-      html5QrcodeScannerRef.current = null;
+      try {
+        await html5QrcodeScannerRef.current.clear();
+        html5QrcodeScannerRef.current = null;
+      } catch (err) {
+        console.error('Error stopping scanner:', err);
+      }
     }
     setIsScanning(false);
   };
@@ -202,6 +259,18 @@ const QRScanner = () => {
     window.location.href = '/admin/home';
   };
 
+  const requestCameraPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop());
+      setCameraPermission('granted');
+      setError(null);
+    } catch (err) {
+      setCameraPermission('denied');
+      setError('Camera permission is required to scan QR codes. Please allow camera access in your browser settings.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4">
       <div className="max-w-7xl mx-auto">
@@ -302,6 +371,20 @@ const QRScanner = () => {
           <div className="bg-white rounded-2xl shadow-xl p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">📷 QR Code Scanner</h2>
             
+            {/* Camera Permission Warning */}
+            {cameraPermission === 'denied' && (
+              <div className="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
+                <p className="font-semibold mb-2">⚠️ Camera Access Required</p>
+                <p className="text-sm mb-3">Please allow camera access to scan QR codes.</p>
+                <button
+                  onClick={requestCameraPermission}
+                  className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-700"
+                >
+                  Grant Camera Permission
+                </button>
+              </div>
+            )}
+
             {!isScanning && !scanResult && !processingCheckIn && (
               <div className="text-center py-12">
                 <div className="mb-6">
@@ -311,10 +394,14 @@ const QRScanner = () => {
                 </div>
                 <button
                   onClick={startScanner}
-                  className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all transform hover:scale-105 shadow-lg"
+                  disabled={cameraPermission === 'denied'}
+                  className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Start Scanning
                 </button>
+                <p className="text-xs text-gray-500 mt-4">
+                  Make sure you're on HTTPS and camera permissions are granted
+                </p>
               </div>
             )}
 
@@ -508,11 +595,6 @@ const QRScanner = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {history.map((team, idx) => (
                     <tr key={team._id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{idx + 1}</td>
-                      <td className="px-4 py-3">
-                        <div className="text-sm font-medium text-gray-900">{team.teamName}</div>
-                        <div className="text-xs text-gray-500">{team.teamSize}</div>
-                      </td>
                       <td className="px-4 py-3">
                         <div className="text-sm text-gray-900">{team.leader?.name}</div>
                         <div className="text-xs text-gray-500">{team.leader?.email}</div>
