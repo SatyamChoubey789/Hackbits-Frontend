@@ -41,7 +41,7 @@ const PaymentModal = ({ team, onSuccess, onClose }) => {
       }
 
       // Create order
-      const orderResponse = await api.post('/payment/create-order', {
+      const orderResponse = await api.post('/payments/create-order', {
         teamId: team._id,
       });
 
@@ -58,7 +58,7 @@ const PaymentModal = ({ team, onSuccess, onClose }) => {
         handler: async function (response) {
           try {
             // Verify payment
-            const verifyResponse = await api.post('/payment/verify-payment', {
+            const verifyResponse = await api.post('/payments/verify-payment', {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
