@@ -8,7 +8,7 @@ import {
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 
 // Pages
 import Home from "./pages/Home";
@@ -28,30 +28,30 @@ function App() {
     <AuthProvider>
       <Router>
         <Toaster
-        position="top-right"
-        reverseOrder={false}
-        toastOptions={{
-          style: {
-            background: "#fff",
-            color: "#333",
-            borderRadius: "8px",
-            padding: "12px 16px",
-            fontSize: "0.95rem",
-          },
-          success: {
-            iconTheme: {
-              primary: "#16a34a", // Tailwind green-600
-              secondary: "#fff",
+          position="top-right"
+          reverseOrder={false}
+          toastOptions={{
+            style: {
+              background: "#fff",
+              color: "#333",
+              borderRadius: "8px",
+              padding: "12px 16px",
+              fontSize: "0.95rem",
             },
-          },
-          error: {
-            iconTheme: {
-              primary: "#dc2626", // Tailwind red-600
-              secondary: "#fff",
+            success: {
+              iconTheme: {
+                primary: "#16a34a", // Tailwind green-600
+                secondary: "#fff",
+              },
             },
-          },
-        }}
-      />
+            error: {
+              iconTheme: {
+                primary: "#dc2626", // Tailwind red-600
+                secondary: "#fff",
+              },
+            },
+          }}
+        />
         <div className="min-h-screen bg-gray-50">
           <Navbar />
           <main>
@@ -67,6 +67,7 @@ function App() {
               {/* Admin Routes - Not public, only accessible via direct link */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/home" element={<AdminHome />} />
+              <Route path="/admin/qr-scanner" element={<QRScanner />} />
 
               {/* Protected Routes */}
               <Route
