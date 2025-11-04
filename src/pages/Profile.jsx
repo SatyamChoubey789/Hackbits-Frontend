@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [profileData, setProfileData] = useState({
     name: '',
@@ -17,6 +19,8 @@ const Profile = () => {
     newPassword: '',
     confirmPassword: '',
   });
+  const [team, setTeam] = useState(null);
+  const [loadingTeam, setLoadingTeam] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -31,7 +35,20 @@ const Profile = () => {
         year: user.year || '',
       });
     }
+    fetchTeamStatus();
   }, [user]);
+
+  const fetchTeamStatus = async () => {
+    try {
+      const response = await api.get('/teams/my-team');
+      setTeam(response.data.team);
+    } catch (error) {
+      // No team found - user hasn't registered yet
+      console.log('No team found');
+    } finally {
+      setLoadingTeam(false);
+    }
+  };
 
   const handleProfileChange = (e) => {
     setProfileData({
@@ -100,15 +117,129 @@ const Profile = () => {
     setLoading(false);
   };
 
+  const getStatusBadge = (status) => {
+    const badges = {
+      verified: { bg: 'bg-green-100', text: 'text-green-800', label: 'Verified ✓' },
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending Review' },
+      rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected' },
+    };
+    const badge = badges[status] || badges.pending;
+    return (
+      <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${badge.bg} ${badge.text}`}>
+        {badge.label}
+      </span>
+    );
+  };
+
+  const getRegistrationProgress = () => {
+    if (!team) return 0;
+    let progress = 25; // Registered
+    if (team.razorpayPaymentId) progress = 50; // Paid
+    if (team.paymentScreenshot && team.idCard) progress = 75; // Documents uploaded
+    if (team.paymentStatus === 'verified') progress = 100; // Verified
+    return progress;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">My Profile</h1>
           <p className="text-lg text-gray-600">
-            Manage your account settings and personal information.
+            Manage your account settings and hackathon registration status
           </p>
         </div>
+
+        {/* Registration Status Banner */}
+        {!loadingTeam && (
+          <div className="mb-8">
+            {team ? (
+              <div className="card bg-gradient-to-r from-primary-50 to-purple-50">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      🎉 Hackathon Registration Status
+                    </h3>
+                    <p className="text-gray-600">
+                      Team: <strong>{team.teamName}</strong> ({team.registrationNumber})
+                    </p>
+                  </div>
+                  {getStatusBadge(team.paymentStatus)}
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-600">Registration Progress</span>
+                    <span className="font-semibold text-primary-600">{getRegistrationProgress()}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-primary-500 to-purple-500 h-3 rounded-full transition-all duration-500"
+                      style={{ width: `${getRegistrationProgress()}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Status Details */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="text-center p-3 bg-white rounded-lg">
+                    <div className={`text-2xl mb-1 ${team ? 'text-green-500' : 'text-gray-300'}`}>
+                      {team ? '✓' : '○'}
+                    </div>
+                    <div className="text-xs text-gray-600">Registered</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg">
+                    <div className={`text-2xl mb-1 ${team.razorpayPaymentId ? 'text-green-500' : 'text-gray-300'}`}>
+                      {team.razorpayPaymentId ? '✓' : '○'}
+                    </div>
+                    <div className="text-xs text-gray-600">Payment</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg">
+                    <div className={`text-2xl mb-1 ${team.paymentScreenshot && team.idCard ? 'text-green-500' : 'text-gray-300'}`}>
+                      {team.paymentScreenshot && team.idCard ? '✓' : '○'}
+                    </div>
+                    <div className="text-xs text-gray-600">Documents</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg">
+                    <div className={`text-2xl mb-1 ${team.paymentStatus === 'verified' ? 'text-green-500' : 'text-gray-300'}`}>
+                      {team.paymentStatus === 'verified' ? '✓' : '○'}
+                    </div>
+                    <div className="text-xs text-gray-600">Verified</div>
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <div className="mt-6 text-center">
+                  <button
+                    onClick={() => navigate('/team-details')}
+                    className="btn-primary"
+                  >
+                    View Team Details →
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="card bg-blue-50 border-2 border-blue-200">
+                <div className="text-center">
+                  <div className="text-5xl mb-4">🚀</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Ready to Join the Hackathon?
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    You haven't registered for the hackathon yet. Register now to secure your spot!
+                  </p>
+                  <button
+                    onClick={() => navigate('/team-register')}
+                    className="btn-primary"
+                  >
+                    Register for Hackathon →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="mb-8">
@@ -163,67 +294,76 @@ const Profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
+                    Full Name *
                   </label>
                   <input
                     type="text"
                     id="name"
                     name="name"
+                    required
                     className="input-field"
                     value={profileData.name}
                     onChange={handleProfileChange}
+                    placeholder="Enter your full name"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
+                    Phone Number *
                   </label>
                   <input
                     type="tel"
                     id="phone"
                     name="phone"
+                    required
                     className="input-field"
                     value={profileData.phone}
                     onChange={handleProfileChange}
+                    placeholder="+91 9876543210"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="university" className="block text-sm font-medium text-gray-700 mb-2">
-                    University
+                    University/College *
                   </label>
                   <input
                     type="text"
                     id="university"
                     name="university"
+                    required
                     className="input-field"
                     value={profileData.university}
                     onChange={handleProfileChange}
+                    placeholder="Your university name"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="course" className="block text-sm font-medium text-gray-700 mb-2">
-                    Course
+                    Course/Degree *
                   </label>
                   <input
                     type="text"
                     id="course"
                     name="course"
+                    required
                     className="input-field"
                     value={profileData.course}
                     onChange={handleProfileChange}
+                    placeholder="e.g., B.Tech CSE"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
-                    Year
+                    Year *
                   </label>
                   <select
                     id="year"
                     name="year"
+                    required
                     className="input-field"
                     value={profileData.year}
                     onChange={handleProfileChange}
@@ -237,6 +377,15 @@ const Profile = () => {
                   </select>
                 </div>
               </div>
+
+              {/* Profile Completion Warning */}
+              {(!profileData.name || !profileData.phone || !profileData.university || !profileData.course || !profileData.year) && (
+                <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+                  <p className="text-sm text-yellow-800">
+                    <strong>⚠️ Complete your profile:</strong> Please fill in all fields before registering for the hackathon.
+                  </p>
+                </div>
+              )}
 
               {/* Read-only fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
@@ -317,6 +466,7 @@ const Profile = () => {
                   value={passwordData.newPassword}
                   onChange={handlePasswordChange}
                 />
+                <p className="text-sm text-gray-500 mt-1">Must be at least 6 characters long</p>
               </div>
 
               <div>
