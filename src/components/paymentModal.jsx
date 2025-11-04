@@ -5,6 +5,8 @@ const PaymentModal = ({ team, onSuccess, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+
+  
   const PAYMENT_AMOUNTS = {
     Solo: 500,
     Duo: 800,
