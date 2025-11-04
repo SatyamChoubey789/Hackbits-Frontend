@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../api/axios";
-import PaymentModal from "../components/PaymentModal";
+import PaymentModal from "./PaymentModal";
 
 const TeamDetails = () => {
   const { user } = useAuth();
