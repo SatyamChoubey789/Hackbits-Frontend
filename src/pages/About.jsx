@@ -138,7 +138,7 @@ const About = () => {
       </section>
 
       {/* Organizers Section */}
-      <section className="py-20 bg-gray-50">
+      {/*<section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -168,7 +168,7 @@ const About = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section>*/}
 
       {/* Sponsors Section */}
       <section className="py-20 bg-white">
@@ -330,7 +330,7 @@ const About = () => {
                 href="mailto:hackathon@university.edu"
                 className="text-primary-600 hover:text-primary-700 font-medium"
               >
-                hackathon@university.edu
+                hackbitsofficialteam@gmail.com
               </a>
             </div>
 
@@ -346,7 +346,7 @@ const About = () => {
                 href="tel:+1234567890"
                 className="text-primary-600 hover:text-primary-700 font-medium"
               >
-                +1 (234) 567-890
+                +91 95550 40155
               </a>
             </div>
 
@@ -356,10 +356,10 @@ const About = () => {
                 Visit Us
               </h3>
               <p className="text-gray-600 mb-4">
-                University Tech Center, Room 101
+                Lovely Professional University
               </p>
               <p className="text-primary-600 font-medium">
-                123 University Ave, City, State 12345
+                Block 34, Jalandhar, Punjab, India
               </p>
             </div>
           </div>

@@ -625,3 +625,8 @@ const QRScanner = () => {
 };
 
 export default QRScanner;
+//The root cause of
+//Scanner initialization error: HTML Element with id=qr-reader not found
+
+
+///The error happens because your startScanner() function runs before the <div id="qr-reader"> exists in the DOM.
