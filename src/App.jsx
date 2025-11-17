@@ -23,8 +23,10 @@ import About from "./pages/About";
 import ProblemStatements from "./pages/ProblemStatements";
 import Sponsors from "./pages/Sponsors";
 import QRScanner from "./pages/QRScanner";
-import { PolicyPage } from "./pages/policypage";
 import { Footer } from "./components/Footer";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import RefundPolicy from "./pages/RefundPolicy";
 
 function App() {
   return (
@@ -66,7 +68,12 @@ function App() {
               <Route path="/sponsors" element={<Sponsors />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/policies" element={<PolicyPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route
+                path="/terms-and-conditions"
+                element={<TermsAndConditions />}
+              />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
 
               {/* Admin Routes - Not public, only accessible via direct link */}
               <Route path="/admin/login" element={<AdminLogin />} />
