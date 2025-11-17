@@ -3,7 +3,6 @@
 
 import PolicyContent from '../components/PolicyContent';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import './policypage.css';
 
 const PolicyPage = () => {
@@ -14,7 +13,6 @@ const PolicyPage = () => {
                 <h1>Our Policies</h1>
                 <PolicyContent />
             </main>
-            <Footer />
         </div>
     );
 }
