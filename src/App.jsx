@@ -27,6 +27,8 @@ import { Footer } from "./components/Footer";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
+import AdminCheckin from './components/AdminCheckin';
+
 
 function App() {
   return (
@@ -78,7 +80,7 @@ function App() {
               {/* Admin Routes - Not public, only accessible via direct link */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/home" element={<AdminHome />} />
-              <Route path="/admin/qr-scanner" element={<QRScanner />} />
+              <Route path="/admin/checkin" element={<AdminCheckin />} />
 
               {/* Protected Routes */}
               <Route
