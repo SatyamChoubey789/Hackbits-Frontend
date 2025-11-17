@@ -135,7 +135,7 @@ const AdminCheckin = () => {
             </div>
             <div className="flex space-x-4">
               <button
-                onClick={() => navigate("/admin")}
+                onClick={() => navigate("/admin/home")}
                 className="btn-secondary"
               >
                 ← Back to Admin
