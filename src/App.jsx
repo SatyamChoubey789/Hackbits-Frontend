@@ -23,6 +23,7 @@ import About from "./pages/About";
 import ProblemStatements from "./pages/ProblemStatements";
 import Sponsors from "./pages/Sponsors";
 import QRScanner from "./pages/QRScanner";
+import PolicyPage from "./pages/policypage";
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
               <Route path="/sponsors" element={<Sponsors />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/policies" element={<PolicyPage />} />
 
               {/* Admin Routes - Not public, only accessible via direct link */}
               <Route path="/admin/login" element={<AdminLogin />} />
