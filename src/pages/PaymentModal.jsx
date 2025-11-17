@@ -5,7 +5,7 @@ const RazorpayPaymentButton = ({ team, onClose, onSuccess }) => {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [error, setError] = useState('');
 
-  const PAYMENT_AMOUNT = team?.teamSize === 'Solo' ? 500 : team?.teamSize === 'Duo' ? 800 : 1200;
+  const PAYMENT_AMOUNT = team?.teamSize === 'Solo' ? 79 : team?.teamSize === 'Duo' ? 800 : 1200;
   const PAYMENT_BUTTON_ID = process.env.REACT_APP_RAZORPAY_BUTTON_ID || 'pl_RgmK6SNHKWdeUH';
 
   useEffect(() => {
