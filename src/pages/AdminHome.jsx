@@ -8,6 +8,9 @@ const AdminHome = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -53,28 +56,51 @@ const AdminHome = () => {
     fetchData();
   }, [checkAdminAuth, fetchData]);
 
-  const handlePaymentStatusChange = async (teamId, newStatus) => {
+  const handlePaymentStatusChange = async (teamId, newStatus, reason = "") => {
     setVerifying(teamId);
     try {
       const response = await adminApi.put(`/admin/teams/${teamId}/payment-status`, {
         paymentStatus: newStatus,
+        rejectionReason: reason
       });
 
+      // Update teams list
       setTeams(
         teams.map((team) =>
           team._id === teamId ? response.data.team : team
         )
       );
 
+      // Refresh stats
       fetchData();
       
       alert(response.data.message);
+      
+      // Close rejection modal if open
+      if (showRejectionModal) {
+        setShowRejectionModal(false);
+        setRejectionReason("");
+        setSelectedTeam(null);
+      }
     } catch (error) {
       console.error("Error updating payment status:", error);
       alert(error.response?.data?.message || "Failed to update payment status");
     } finally {
       setVerifying(null);
     }
+  };
+
+  const handleRejectClick = (team) => {
+    setSelectedTeam(team);
+    setShowRejectionModal(true);
+  };
+
+  const handleRejectSubmit = () => {
+    if (!rejectionReason.trim()) {
+      alert("Please provide a reason for rejection");
+      return;
+    }
+    handlePaymentStatusChange(selectedTeam._id, "rejected", rejectionReason);
   };
 
   const handlePasswordChange = async (e) => {
@@ -150,7 +176,7 @@ const AdminHome = () => {
   };
 
   const canVerify = (team) => {
-    return team.razorpayPaymentId && team.paymentScreenshot && team.idCard;
+    return team.transactionId && team.paymentScreenshot && team.idCard;
   };
 
   if (loading) {
@@ -175,20 +201,10 @@ const AdminHome = () => {
                 Admin Dashboard
               </h1>
               <p className="text-gray-600">
-                Manage teams and verify registrations
+                Manage teams and verify manual payments
               </p>
             </div>
             <div className="flex space-x-4">
-              {/* QR Scanner Button - NEW */}
-              <button
-                onClick={() => navigate("/admin/qr-scanner")}
-                className="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-all flex items-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                </svg>
-                <span>QR Scanner</span>
-              </button>
               <button
                 onClick={() => setShowChangePassword(true)}
                 className="btn-secondary"
@@ -268,25 +284,6 @@ const AdminHome = () => {
           </div>
         )}
 
-        {/* Quick Actions Card - NEW */}
-        <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-xl p-6 mb-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold mb-2">🎫 Event Check-In</h3>
-              <p className="text-purple-100">Scan QR codes for participant entry verification</p>
-            </div>
-            <button
-              onClick={() => navigate("/admin/qr-scanner")}
-              className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all flex items-center space-x-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-              </svg>
-              <span>Open Scanner</span>
-            </button>
-          </div>
-        </div>
-
         {/* Teams Table */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -314,7 +311,7 @@ const AdminHome = () => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Team Info</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Leader</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment TXN</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaction ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Documents</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -338,13 +335,13 @@ const AdminHome = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {team.razorpayPaymentId ? (
+                      {team.transactionId ? (
                         <div className="text-xs">
-                          <div className="font-mono bg-gray-100 p-1 rounded">{team.razorpayPaymentId}</div>
+                          <div className="font-mono bg-gray-100 p-2 rounded break-all">{team.transactionId}</div>
                           <div className="text-gray-500 mt-1">₹{team.paymentAmount ? team.paymentAmount / 100 : 0}</div>
                         </div>
                       ) : (
-                        <span className="text-xs text-red-500">Not paid</span>
+                        <span className="text-xs text-red-500">Not provided</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -396,13 +393,13 @@ const AdminHome = () => {
                                 ? "bg-green-500 text-white hover:bg-green-600"
                                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
                             }`}
-                            title={!canVerify(team) ? "Payment and documents required" : "Verify and generate QR"}
+                            title={!canVerify(team) ? "Transaction ID and documents required" : "Verify and generate QR"}
                           >
                             {verifying === team._id ? "Verifying..." : "✓ Verify"}
                           </button>
                         )}
                         <button
-                          onClick={() => handlePaymentStatusChange(team._id, "rejected")}
+                          onClick={() => handleRejectClick(team)}
                           disabled={team.paymentStatus === "rejected" || verifying === team._id}
                           className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50"
                         >
@@ -506,6 +503,50 @@ const AdminHome = () => {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rejection Modal */}
+        {showRejectionModal && selectedTeam && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Reject Payment</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  You are about to reject payment for <strong>{selectedTeam.teamName}</strong>. 
+                  Please provide a reason that will be sent to the user.
+                </p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Rejection Reason *</label>
+                  <textarea
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    rows="4"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                    placeholder="e.g., Payment screenshot is not clear, Transaction ID doesn't match, etc."
+                  />
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowRejectionModal(false);
+                      setRejectionReason("");
+                      setSelectedTeam(null);
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRejectSubmit}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                  >
+                    Reject Payment
+                  </button>
+                </div>
               </div>
             </div>
           </div>
