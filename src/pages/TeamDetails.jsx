@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../api/axios";
-import PaymentQR from "./PaymentModal";
+import RazorpayPaymentButton from "./RazorpayPaymentButton";
 
 const TeamDetails = () => {
   const { user } = useAuth();
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showTicket, setShowTicket] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -32,7 +33,6 @@ const TeamDetails = () => {
 
   const handlePaymentSuccess = async (paymentData) => {
     try {
-      // Save transaction ID to team
       const response = await api.post("/teams/save-transaction", {
         teamId: team._id,
         transactionId: paymentData.transactionId,
@@ -41,13 +41,12 @@ const TeamDetails = () => {
 
       setShowPaymentModal(false);
       setSuccess(
-        `Transaction ID saved! Transaction ID: ${paymentData.transactionId}. Now upload payment screenshot and ID card for verification.`
+        `Payment ID saved! Transaction ID: ${paymentData.transactionId}. Now upload payment screenshot and ID card for verification.`
       );
-      // Refresh team details
       fetchTeamDetails();
     } catch (error) {
       console.error("Save transaction error:", error);
-      setError(error.response?.data?.message || "Failed to save transaction ID");
+      setError(error.response?.data?.message || "Failed to save payment ID");
     }
   };
 
@@ -91,32 +90,44 @@ const TeamDetails = () => {
       setSuccess(response.data.message);
       setPaymentScreenshot(null);
       setIdCard(null);
-      // Clear file inputs
       document.getElementById("paymentScreenshot").value = "";
       document.getElementById("idCard").value = "";
       
-      // Refresh team details
       fetchTeamDetails();
     } catch (error) {
       console.error("Upload error:", error);
-      setError(
-        error.response?.data?.message || "Failed to upload documents"
-      );
+      setError(error.response?.data?.message || "Failed to upload documents");
     } finally {
       setUploading(false);
     }
   };
 
-  const downloadQRCode = () => {
-    if (!team.qrCode) {
-      setError("QR code not available");
+  const viewTicket = () => {
+    if (!team.ticketHTML) {
+      setError("Ticket not available");
       return;
     }
 
-    const link = document.createElement("a");
-    link.download = `${team.registrationNumber}-QRCode.png`;
-    link.href = team.qrCode;
+    // Open ticket in new window
+    const ticketWindow = window.open("", "_blank");
+    ticketWindow.document.write(team.ticketHTML);
+    ticketWindow.document.close();
+  };
+
+  const downloadTicketPDF = () => {
+    if (!team.ticketHTML) {
+      setError("Ticket not available");
+      return;
+    }
+
+    // Create blob and download
+    const blob = new Blob([team.ticketHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${team.ticketNumber}-Ticket.html`;
     link.click();
+    URL.revokeObjectURL(url);
   };
 
   const getPaymentAmount = () => {
@@ -129,7 +140,7 @@ const TeamDetails = () => {
   };
 
   const getVerificationStatus = () => {
-    if (team.paymentStatus === "verified" && team.qrCode) {
+    if (team.paymentStatus === "verified" && team.ticketNumber) {
       return "complete";
     }
     if (team.transactionId && team.paymentScreenshot && team.idCard) {
@@ -156,15 +167,9 @@ const TeamDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            No Team Found
-          </h1>
-          <p className="text-gray-600 mb-6">
-            You haven't registered for any team yet.
-          </p>
-          <a href="/team-register" className="btn-primary inline-block">
-            Register Team
-          </a>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">No Team Found</h1>
+          <p className="text-gray-600 mb-6">You haven't registered for any team yet.</p>
+          <a href="/team-register" className="btn-primary inline-block">Register Team</a>
         </div>
       </div>
     );
@@ -177,12 +182,8 @@ const TeamDetails = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Team Details
-          </h1>
-          <p className="text-lg text-gray-600">
-            Your registration details and verification status
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Team Details</h1>
+          <p className="text-lg text-gray-600">Your registration details and verification status</p>
         </div>
 
         {/* Success Message */}
@@ -209,11 +210,9 @@ const TeamDetails = () => {
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-semibold text-green-800">
-                  Verification Complete! ✓
-                </h3>
+                <h3 className="text-lg font-semibold text-green-800">🎉 Verification Complete!</h3>
                 <p className="text-sm text-green-700 mt-1">
-                  Your registration is complete. Your team is all set for the hackathon!
+                  Your ticket has been generated! You're all set for the hackathon.
                 </p>
               </div>
             </div>
@@ -229,11 +228,9 @@ const TeamDetails = () => {
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-semibold text-yellow-800">
-                  Pending Admin Verification
-                </h3>
+                <h3 className="text-lg font-semibold text-yellow-800">Pending Admin Verification</h3>
                 <p className="text-sm text-yellow-700 mt-1">
-                  Your payment and documents are submitted. Admin will verify and generate your QR code soon.
+                  Your payment and documents are submitted. Ticket will be generated after admin approval.
                 </p>
               </div>
             </div>
@@ -243,51 +240,36 @@ const TeamDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Team Information */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Team Information
-            </h2>
-
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Team Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Team Name
-                </label>
-                <p className="mt-1 text-lg font-semibold text-gray-900">
-                  {team.teamName}
-                </p>
+                <label className="block text-sm font-medium text-gray-700">Team Name</label>
+                <p className="mt-1 text-lg font-semibold text-gray-900">{team.teamName}</p>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Registration Number
-                </label>
-                <p className="mt-1 text-lg font-mono text-primary-600">
-                  {team.registrationNumber}
-                </p>
+                <label className="block text-sm font-medium text-gray-700">Registration Number</label>
+                <p className="mt-1 text-lg font-mono text-primary-600">{team.registrationNumber}</p>
               </div>
-
+              {team.ticketNumber && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Ticket Number</label>
+                  <p className="mt-1 text-2xl font-bold font-mono text-purple-600">{team.ticketNumber}</p>
+                </div>
+              )}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Team Size
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Team Size</label>
                 <p className="mt-1 text-gray-900">{team.teamSize}</p>
               </div>
-
               {team.transactionId && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Transaction ID
-                  </label>
-                  <p className="mt-1 text-sm font-mono text-gray-900 bg-gray-50 p-2 rounded">
+                  <label className="block text-sm font-medium text-gray-700">Payment ID</label>
+                  <p className="mt-1 text-sm font-mono text-gray-900 bg-gray-50 p-2 rounded break-all">
                     {team.transactionId}
                   </p>
                 </div>
               )}
-
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Verification Status
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Verification Status</label>
                 <span
                   className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-1 ${
                     team.paymentStatus === "verified"
@@ -297,30 +279,26 @@ const TeamDetails = () => {
                       : "bg-yellow-100 text-yellow-800"
                   }`}
                 >
-                  {team.paymentStatus.charAt(0).toUpperCase() +
-                    team.paymentStatus.slice(1)}
+                  {team.paymentStatus.charAt(0).toUpperCase() + team.paymentStatus.slice(1)}
                 </span>
               </div>
+              {team.paymentStatus === "rejected" && team.rejectionReason && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Rejection Reason</label>
+                  <p className="mt-1 text-sm text-red-600 bg-red-50 p-2 rounded">{team.rejectionReason}</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Team Leader */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Participant Details
-            </h2>
-
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Participant Details</h2>
             <div className="bg-primary-50 p-4 rounded-lg">
               <div className="space-y-1">
-                <p className="text-primary-700">
-                  <strong>Name:</strong> {team.leader.name}
-                </p>
-                <p className="text-primary-700">
-                  <strong>Email:</strong> {team.leader.email}
-                </p>
-                <p className="text-primary-700">
-                  <strong>Reg No:</strong> {team.leader.registrationNumber}
-                </p>
+                <p className="text-primary-700"><strong>Name:</strong> {team.leader.name}</p>
+                <p className="text-primary-700"><strong>Email:</strong> {team.leader.email}</p>
+                <p className="text-primary-700"><strong>Reg No:</strong> {team.leader.registrationNumber}</p>
               </div>
             </div>
           </div>
@@ -329,216 +307,97 @@ const TeamDetails = () => {
         {/* Payment Section */}
         {verificationStatus === "pending_payment" && (
           <div className="card mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Complete Payment
-            </h2>
-
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Complete Payment</h2>
             <div className="bg-gradient-to-r from-primary-50 to-purple-50 p-6 rounded-lg mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Registration Fee
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    For {team.teamSize} Registration
-                  </p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Registration Fee</h3>
+                  <p className="text-sm text-gray-600">For {team.teamSize} Registration</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-primary-600">
-                    ₹{getPaymentAmount()}
-                  </p>
+                  <p className="text-3xl font-bold text-primary-600">₹{getPaymentAmount()}</p>
                 </div>
               </div>
             </div>
-
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-md">
-                <h4 className="font-semibold text-blue-900 mb-2">
-                  Payment Process:
-                </h4>
-                <ul className="list-decimal list-inside space-y-1 text-sm text-blue-800">
-                  <li>Click "Proceed to Payment" to view payment QR code</li>
-                  <li>Scan QR and make payment via any UPI app</li>
-                  <li>Enter the Transaction ID after successful payment</li>
-                  <li>Upload payment screenshot</li>
-                  <li>Upload your college ID card for verification</li>
-                  <li>Admin will verify your details</li>
-                  <li>QR code will be generated after approval</li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => setShowPaymentModal(true)}
-                className="w-full btn-primary py-3 text-lg"
-              >
-                Proceed to Payment (₹{getPaymentAmount()})
-              </button>
-            </div>
+            <button
+              onClick={() => setShowPaymentModal(true)}
+              className="w-full btn-primary py-3 text-lg"
+            >
+              Proceed to Payment (₹{getPaymentAmount()})
+            </button>
           </div>
         )}
 
         {/* Document Upload Section */}
         {verificationStatus === "pending_documents" && (
           <div className="card mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Upload Verification Documents
-            </h2>
-
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Upload Verification Documents</h2>
             <div className="space-y-6">
               <div className="bg-green-50 border border-green-200 p-4 rounded-md mb-4">
                 <p className="text-sm text-green-800">
-                  ✓ Payment completed with Transaction ID: <strong>{team.transactionId}</strong>
+                  ✓ Payment completed with Payment ID: <strong>{team.transactionId}</strong>
                 </p>
               </div>
-
-              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md mb-4">
-                <p className="text-sm text-yellow-800">
-                  <strong>Important:</strong> Upload both payment screenshot and college ID card for admin verification.
-                </p>
-              </div>
-
-              {/* Payment Screenshot */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Payment Screenshot *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Payment Screenshot *</label>
                 <input
                   type="file"
                   id="paymentScreenshot"
                   accept="image/*"
                   onChange={(e) => handleFileChange(e, "payment")}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-primary-50 file:text-primary-700
-                    hover:file:bg-primary-100"
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                 />
-                {paymentScreenshot && (
-                  <p className="mt-2 text-sm text-green-600">
-                    ✓ {paymentScreenshot.name}
-                  </p>
-                )}
+                {paymentScreenshot && <p className="mt-2 text-sm text-green-600">✓ {paymentScreenshot.name}</p>}
               </div>
-
-              {/* ID Card */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  College ID Card *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">College ID Card *</label>
                 <input
                   type="file"
                   id="idCard"
                   accept="image/*"
                   onChange={(e) => handleFileChange(e, "idCard")}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-primary-50 file:text-primary-700
-                    hover:file:bg-primary-100"
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                 />
-                {idCard && (
-                  <p className="mt-2 text-sm text-green-600">
-                    ✓ {idCard.name}
-                  </p>
-                )}
+                {idCard && <p className="mt-2 text-sm text-green-600">✓ {idCard.name}</p>}
               </div>
-
               <button
                 onClick={handleUploadDocuments}
                 disabled={uploading || !paymentScreenshot || !idCard}
                 className="w-full btn-primary py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {uploading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Uploading...
-                  </div>
-                ) : (
-                  "Upload Documents"
-                )}
+                {uploading ? "Uploading..." : "Upload Documents"}
               </button>
             </div>
           </div>
         )}
 
-        {/* Uploaded Documents Preview */}
-        {team.paymentScreenshot && team.idCard && (
+        {/* Ticket Section */}
+        {team.paymentStatus === "verified" && team.ticketNumber && (
           <div className="card mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Uploaded Documents
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Payment Screenshot
-                </h3>
-                <img
-                  src={team.paymentScreenshot}
-                  alt="Payment Screenshot"
-                  className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
-                />
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">🎟️ Your Hackathon Ticket</h2>
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-lg text-center">
+              <div className="mb-6">
+                <div className="text-6xl mb-4">🎫</div>
+                <p className="text-2xl font-bold text-gray-900 mb-2">Ticket Generated!</p>
+                <p className="text-lg font-mono font-bold text-purple-600">{team.ticketNumber}</p>
               </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  College ID Card
-                </h3>
-                <img
-                  src={team.idCard}
-                  alt="College ID"
-                  className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* QR Code Section */}
-        {team.paymentStatus === "verified" && team.qrCode && (
-          <div className="card mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Team QR Code
-            </h2>
-
-            <div className="text-center">
-              <div className="inline-block p-6 bg-white rounded-lg shadow-lg border-2 border-primary-200">
-                <img
-                  src={team.qrCode}
-                  alt="Team QR Code"
-                  className="mx-auto w-64 h-64 object-contain"
-                />
-              </div>
-
-              <div className="mt-6 space-y-3">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={downloadQRCode}
-                  className="btn-primary px-6 py-3"
+                  onClick={viewTicket}
+                  className="btn-primary px-8 py-3"
                 >
-                  <svg
-                    className="w-5 h-5 inline mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                    />
-                  </svg>
-                  Download QR Code
+                  👁️ View Ticket
                 </button>
-
-                <p className="text-sm text-gray-600">
-                  Save this QR code and present it at the event venue for entry
-                </p>
+                <button
+                  onClick={downloadTicketPDF}
+                  className="btn-secondary px-8 py-3"
+                >
+                  💾 Download Ticket
+                </button>
               </div>
-
-              <div className="mt-6 bg-green-50 border border-green-200 p-4 rounded-md">
-                <p className="text-sm text-green-800">
-                  <strong>Important:</strong> This QR code is unique to your team. Keep it safe and bring it to the event!
+              <div className="mt-6 bg-white p-4 rounded-lg border-2 border-purple-200">
+                <p className="text-sm text-gray-700">
+                  <strong>⚠️ Important:</strong> Save and bring this ticket (digital or printed) to the event venue for entry.
                 </p>
               </div>
             </div>
@@ -546,9 +405,8 @@ const TeamDetails = () => {
         )}
       </div>
 
-      {/* Payment Modal */}
       {showPaymentModal && (
-        <PaymentQR
+        <RazorpayPaymentButton
           team={team}
           onSuccess={handlePaymentSuccess}
           onClose={() => setShowPaymentModal(false)}

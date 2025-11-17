@@ -1,36 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const PaymentQR = ({ team, onClose, onSuccess }) => {
+const RazorpayPaymentButton = ({ team, onClose, onSuccess }) => {
   const [transactionId, setTransactionId] = useState('');
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  // Payment QR code - Replace with your actual payment QR
-  const PAYMENT_QR_URL = process.env.REACT_APP_PAYMENT_QR_URL || '/payment-qr.png';
-  const UPI_ID = process.env.REACT_APP_UPI_ID || 'hackathon@upi';
   const PAYMENT_AMOUNT = team?.teamSize === 'Solo' ? 500 : team?.teamSize === 'Duo' ? 800 : 1200;
+  const PAYMENT_BUTTON_ID = process.env.REACT_APP_RAZORPAY_BUTTON_ID || 'pl_RgmK6SNHKWdeUH';
+
+  useEffect(() => {
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/payment-button.js';
+    script.setAttribute('data-payment_button_id', PAYMENT_BUTTON_ID);
+    script.async = true;
+
+    const form = document.getElementById('razorpay-payment-form');
+    if (form) {
+      form.appendChild(script);
+    }
+
+    // Listen for payment success
+    window.addEventListener('message', handlePaymentMessage);
+
+    return () => {
+      window.removeEventListener('message', handlePaymentMessage);
+      if (form) {
+        form.innerHTML = '';
+      }
+    };
+  }, [PAYMENT_BUTTON_ID]);
+
+  const handlePaymentMessage = (event) => {
+    // Razorpay sends payment success event
+    if (event.data && event.data.razorpay_payment_id) {
+      setPaymentCompleted(true);
+      setTransactionId(event.data.razorpay_payment_id);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!transactionId.trim()) {
-      setError('Please enter transaction ID');
+      setError('Please complete payment first and enter the payment ID');
       return;
     }
 
-    setLoading(true);
     setError('');
 
     try {
-      // Just save the transaction ID, actual verification done by admin
       onSuccess({
         transactionId: transactionId,
         amount: PAYMENT_AMOUNT
       });
     } catch (err) {
-      setError('Failed to submit transaction ID');
-    } finally {
-      setLoading(false);
+      setError('Failed to submit payment details');
     }
   };
 
@@ -64,57 +89,46 @@ const PaymentQR = ({ team, onClose, onSuccess }) => {
           <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
             <h3 className="font-semibold text-blue-900 mb-2">Payment Instructions:</h3>
             <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
-              <li>Scan the QR code below using any UPI app (Google Pay, PhonePe, Paytm, etc.)</li>
-              <li>Or use UPI ID: <strong>{UPI_ID}</strong></li>
-              <li>Pay exactly ₹{PAYMENT_AMOUNT}</li>
-              <li>After successful payment, enter the Transaction ID below</li>
-              <li>Take a screenshot of the payment confirmation</li>
-              <li>You'll need to upload the screenshot in the next step</li>
+              <li>Click the "Pay Now" button below</li>
+              <li>Complete payment using Razorpay (UPI, Card, NetBanking, Wallets)</li>
+              <li>After successful payment, copy the Payment ID</li>
+              <li>Enter the Payment ID in the field below</li>
+              <li>Take a screenshot of payment confirmation</li>
+              <li>Upload the screenshot along with your ID card in the next step</li>
             </ol>
           </div>
 
-          {/* QR Code */}
-          <div className="text-center mb-6">
-            <div className="inline-block p-4 bg-white rounded-lg shadow-lg border-2 border-primary-200">
-              <img
-                src={PAYMENT_QR_URL}
-                alt="Payment QR Code"
-                className="w-64 h-64 object-contain mx-auto"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'block';
-                }}
-              />
-              <div style={{ display: 'none' }} className="w-64 h-64 flex items-center justify-center bg-gray-100 rounded">
-                <div className="text-center p-4">
-                  <p className="text-gray-600 mb-2">QR Code Not Available</p>
-                  <p className="text-sm text-gray-500">Please use UPI ID: <strong>{UPI_ID}</strong></p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mt-3">Scan with any UPI app</p>
-            </div>
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">UPI ID: <strong className="text-gray-900">{UPI_ID}</strong></p>
-            </div>
+          {/* Razorpay Payment Button */}
+          <div className="text-center mb-6 p-6 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Step 1: Make Payment</h3>
+            <form id="razorpay-payment-form">
+              {/* Razorpay button will be injected here */}
+            </form>
+            <p className="text-xs text-gray-500 mt-4">
+              Secure payment powered by Razorpay
+            </p>
           </div>
 
           {/* Transaction ID Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Transaction ID / UTR Number *
-              </label>
-              <input
-                type="text"
-                value={transactionId}
-                onChange={(e) => setTransactionId(e.target.value)}
-                placeholder="Enter 12-digit transaction ID"
-                className="input-field"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Find this in your payment app after successful payment
-              </p>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Step 2: Enter Payment Details</h3>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Payment ID / Transaction ID *
+                </label>
+                <input
+                  type="text"
+                  value={transactionId}
+                  onChange={(e) => setTransactionId(e.target.value)}
+                  placeholder="Enter Razorpay payment ID (e.g., pay_xxxxxxxxxxxxx)"
+                  className="input-field"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  You'll receive this after successful payment
+                </p>
+              </div>
             </div>
 
             {error && (
@@ -123,13 +137,21 @@ const PaymentQR = ({ team, onClose, onSuccess }) => {
               </div>
             )}
 
+            {paymentCompleted && (
+              <div className="bg-green-50 border border-green-200 p-4 rounded-md">
+                <p className="text-sm text-green-800">
+                  ✓ Payment completed successfully! Payment ID: {transactionId}
+                </p>
+              </div>
+            )}
+
             {/* Important Note */}
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
               <p className="text-sm text-yellow-800">
-                <strong>⚠️ Important:</strong> After submitting, you'll need to upload:
+                <strong>⚠️ Important:</strong> After submitting payment details, you'll need to upload:
               </p>
               <ul className="list-disc list-inside text-sm text-yellow-800 mt-2 ml-2">
-                <li>Payment screenshot</li>
+                <li>Payment screenshot (from Razorpay confirmation)</li>
                 <li>College ID card</li>
               </ul>
               <p className="text-sm text-yellow-800 mt-2">
@@ -148,10 +170,10 @@ const PaymentQR = ({ team, onClose, onSuccess }) => {
               </button>
               <button
                 type="submit"
-                disabled={loading || !transactionId.trim()}
+                disabled={!transactionId.trim()}
                 className="flex-1 btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Submitting...' : 'Submit Transaction ID'}
+                Submit Payment ID
               </button>
             </div>
           </form>
@@ -171,4 +193,4 @@ const PaymentQR = ({ team, onClose, onSuccess }) => {
   );
 };
 
-export default PaymentQR;
+export default RazorpayPaymentButton;
