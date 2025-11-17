@@ -64,16 +64,7 @@ export const Footer = () => {
           </ul>
         </div>
 
-        {/* Social Links */}
-        <div>
-          <h3 className="text-white text-lg font-semibold mb-4">Follow Us</h3>
-          <div className="flex space-x-5 text-2xl">
-            <a href="#" className="hover:text-primary-400">🌐</a>
-            <a href="#" className="hover:text-primary-400">🐦</a>
-            <a href="#" className="hover:text-primary-400">📸</a>
-            <a href="#" className="hover:text-primary-400">💼</a>
-          </div>
-        </div>
+        
 
       </div>
 
