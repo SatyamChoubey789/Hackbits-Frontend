@@ -205,6 +205,14 @@ const AdminHome = () => {
               </p>
             </div>
             <div className="flex space-x-4">
+              <button>
+                <a
+                  href="/admin/checkin"
+                  className="btn-primary bg-blue-600 hover:bg-blue-700"/>
+                  Check-in
+              </button>
+            </div>
+            <div className="flex space-x-4">
               <button
                 onClick={() => setShowChangePassword(true)}
                 className="btn-secondary"
