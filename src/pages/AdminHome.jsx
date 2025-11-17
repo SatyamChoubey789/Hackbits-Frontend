@@ -59,23 +59,24 @@ const AdminHome = () => {
   const handlePaymentStatusChange = async (teamId, newStatus, reason = "") => {
     setVerifying(teamId);
     try {
-      const response = await adminApi.put(`/admin/teams/${teamId}/payment-status`, {
-        paymentStatus: newStatus,
-        rejectionReason: reason
-      });
+      const response = await adminApi.put(
+        `/admin/teams/${teamId}/payment-status`,
+        {
+          paymentStatus: newStatus,
+          rejectionReason: reason,
+        }
+      );
 
       // Update teams list
       setTeams(
-        teams.map((team) =>
-          team._id === teamId ? response.data.team : team
-        )
+        teams.map((team) => (team._id === teamId ? response.data.team : team))
       );
 
       // Refresh stats
       fetchData();
-      
+
       alert(response.data.message);
-      
+
       // Close rejection modal if open
       if (showRejectionModal) {
         setShowRejectionModal(false);
@@ -205,13 +206,13 @@ const AdminHome = () => {
               </p>
             </div>
             <div className="flex space-x-4">
-              <button>
-                <a
-                  href="/admin/checkin"
-                  className="btn-primary bg-blue-600 hover:bg-blue-700"/>
+              <a href="/admin/checkin">
+                <button className="btn-primary bg-blue-600 hover:bg-blue-700">
                   Check-in
-              </button>
+                </button>
+              </a>
             </div>
+
             <div className="flex space-x-4">
               <button
                 onClick={() => setShowChangePassword(true)}
@@ -237,13 +238,27 @@ const AdminHome = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    className="w-6 h-6 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Teams</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.totalTeams}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Teams
+                  </p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {stats.totalTeams}
+                  </p>
                 </div>
               </div>
             </div>
@@ -251,13 +266,25 @@ const AdminHome = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="p-2 bg-green-100 rounded-lg">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-6 h-6 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Verified</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.verifiedPayments}</p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {stats.verifiedPayments}
+                  </p>
                 </div>
               </div>
             </div>
@@ -265,13 +292,25 @@ const AdminHome = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="p-2 bg-yellow-100 rounded-lg">
-                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-6 h-6 text-yellow-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Pending</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.pendingPayments}</p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {stats.pendingPayments}
+                  </p>
                 </div>
               </div>
             </div>
@@ -279,13 +318,27 @@ const AdminHome = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="p-2 bg-purple-100 rounded-lg">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg
+                    className="w-6 h-6 text-purple-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Docs Uploaded</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.documentsUploaded}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Docs Uploaded
+                  </p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {stats.documentsUploaded}
+                  </p>
                 </div>
               </div>
             </div>
@@ -296,18 +349,33 @@ const AdminHome = () => {
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-medium text-gray-900">Team Registrations</h2>
+              <h2 className="text-lg font-medium text-gray-900">
+                Team Registrations
+              </h2>
               <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">Filter:</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Filter:
+                </label>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 >
                   <option value="all">All ({teams.length})</option>
-                  <option value="verified">Verified ({teams.filter((t) => t.paymentStatus === "verified").length})</option>
-                  <option value="pending">Pending ({teams.filter((t) => t.paymentStatus === "pending").length})</option>
-                  <option value="rejected">Rejected ({teams.filter((t) => t.paymentStatus === "rejected").length})</option>
+                  <option value="verified">
+                    Verified (
+                    {teams.filter((t) => t.paymentStatus === "verified").length}
+                    )
+                  </option>
+                  <option value="pending">
+                    Pending (
+                    {teams.filter((t) => t.paymentStatus === "pending").length})
+                  </option>
+                  <option value="rejected">
+                    Rejected (
+                    {teams.filter((t) => t.paymentStatus === "rejected").length}
+                    )
+                  </option>
                 </select>
               </div>
             </div>
@@ -317,39 +385,74 @@ const AdminHome = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Team Info</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Leader</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaction ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Documents</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Team Info
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Leader
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Transaction ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Documents
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {getFilteredTeams().map((team) => (
-                  <tr key={team._id} className={!canVerify(team) && team.paymentStatus === 'pending' ? 'bg-yellow-50' : ''}>
+                  <tr
+                    key={team._id}
+                    className={
+                      !canVerify(team) && team.paymentStatus === "pending"
+                        ? "bg-yellow-50"
+                        : ""
+                    }
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{team.teamName}</div>
-                        <div className="text-sm text-gray-500">{team.registrationNumber}</div>
-                        <div className="text-xs text-gray-400">{team.teamSize}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {team.teamName}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {team.registrationNumber}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {team.teamSize}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm">
-                        <div className="font-medium text-gray-900">{team.leader.name}</div>
+                        <div className="font-medium text-gray-900">
+                          {team.leader.name}
+                        </div>
                         <div className="text-gray-500">{team.leader.email}</div>
-                        <div className="text-gray-400">{team.leader.registrationNumber}</div>
+                        <div className="text-gray-400">
+                          {team.leader.registrationNumber}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       {team.transactionId ? (
                         <div className="text-xs">
-                          <div className="font-mono bg-gray-100 p-2 rounded break-all">{team.transactionId}</div>
-                          <div className="text-gray-500 mt-1">₹{team.paymentAmount ? team.paymentAmount / 100 : 0}</div>
+                          <div className="font-mono bg-gray-100 p-2 rounded break-all">
+                            {team.transactionId}
+                          </div>
+                          <div className="text-gray-500 mt-1">
+                            ₹{team.paymentAmount ? team.paymentAmount / 100 : 0}
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-xs text-red-500">Not provided</span>
+                        <span className="text-xs text-red-500">
+                          Not provided
+                        </span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -359,7 +462,12 @@ const AdminHome = () => {
                             src={team.paymentScreenshot}
                             alt="Payment"
                             className="h-12 w-12 object-cover rounded cursor-pointer border-2 border-green-300"
-                            onClick={() => handleImageClick(team.paymentScreenshot, "Payment Screenshot")}
+                            onClick={() =>
+                              handleImageClick(
+                                team.paymentScreenshot,
+                                "Payment Screenshot"
+                              )
+                            }
                           />
                         ) : (
                           <div className="h-12 w-12 bg-red-100 rounded flex items-center justify-center">
@@ -371,7 +479,9 @@ const AdminHome = () => {
                             src={team.idCard}
                             alt="ID Card"
                             className="h-12 w-12 object-cover rounded cursor-pointer border-2 border-blue-300"
-                            onClick={() => handleImageClick(team.idCard, "College ID Card")}
+                            onClick={() =>
+                              handleImageClick(team.idCard, "College ID Card")
+                            }
                           />
                         ) : (
                           <div className="h-12 w-12 bg-red-100 rounded flex items-center justify-center">
@@ -381,12 +491,19 @@ const AdminHome = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(team.paymentStatus)}`}>
-                        {team.paymentStatus.charAt(0).toUpperCase() + team.paymentStatus.slice(1)}
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          team.paymentStatus
+                        )}`}
+                      >
+                        {team.paymentStatus.charAt(0).toUpperCase() +
+                          team.paymentStatus.slice(1)}
                       </span>
                       {team.qrCode && (
                         <div className="mt-1">
-                          <span className="text-xs text-green-600">✓ QR Generated</span>
+                          <span className="text-xs text-green-600">
+                            ✓ QR Generated
+                          </span>
                         </div>
                       )}
                     </td>
@@ -394,28 +511,46 @@ const AdminHome = () => {
                       <div className="flex flex-col space-y-2">
                         {team.paymentStatus !== "verified" && (
                           <button
-                            onClick={() => handlePaymentStatusChange(team._id, "verified")}
-                            disabled={!canVerify(team) || verifying === team._id}
+                            onClick={() =>
+                              handlePaymentStatusChange(team._id, "verified")
+                            }
+                            disabled={
+                              !canVerify(team) || verifying === team._id
+                            }
                             className={`text-xs px-3 py-1 rounded ${
                               canVerify(team)
                                 ? "bg-green-500 text-white hover:bg-green-600"
                                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
                             }`}
-                            title={!canVerify(team) ? "Transaction ID and documents required" : "Verify and generate QR"}
+                            title={
+                              !canVerify(team)
+                                ? "Transaction ID and documents required"
+                                : "Verify and generate QR"
+                            }
                           >
-                            {verifying === team._id ? "Verifying..." : "✓ Verify"}
+                            {verifying === team._id
+                              ? "Verifying..."
+                              : "✓ Verify"}
                           </button>
                         )}
                         <button
                           onClick={() => handleRejectClick(team)}
-                          disabled={team.paymentStatus === "rejected" || verifying === team._id}
+                          disabled={
+                            team.paymentStatus === "rejected" ||
+                            verifying === team._id
+                          }
                           className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50"
                         >
                           ✗ Reject
                         </button>
                         <button
-                          onClick={() => handlePaymentStatusChange(team._id, "pending")}
-                          disabled={team.paymentStatus === "pending" || verifying === team._id}
+                          onClick={() =>
+                            handlePaymentStatusChange(team._id, "pending")
+                          }
+                          disabled={
+                            team.paymentStatus === "pending" ||
+                            verifying === team._id
+                          }
                           className="text-xs bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 disabled:opacity-50"
                         >
                           ⟳ Pending
@@ -431,7 +566,9 @@ const AdminHome = () => {
               <div className="text-center py-8">
                 <div className="text-gray-500 text-lg mb-2">No teams found</div>
                 <div className="text-gray-400 text-sm">
-                  {statusFilter === "all" ? "No teams registered yet." : `No teams with "${statusFilter}" status.`}
+                  {statusFilter === "all"
+                    ? "No teams registered yet."
+                    : `No teams with "${statusFilter}" status.`}
                 </div>
               </div>
             )}
@@ -443,35 +580,58 @@ const AdminHome = () => {
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Change Password
+                </h3>
                 <form onSubmit={handlePasswordChange}>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Current Password</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Current Password
+                      </label>
                       <input
                         type="password"
                         value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            currentPassword: e.target.value,
+                          })
+                        }
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">New Password</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        New Password
+                      </label>
                       <input
                         type="password"
                         value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            newPassword: e.target.value,
+                          })
+                        }
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Confirm New Password
+                      </label>
                       <input
                         type="password"
                         value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                         required
                       />
@@ -497,7 +657,11 @@ const AdminHome = () => {
                         setShowChangePassword(false);
                         setPasswordError("");
                         setPasswordSuccess("");
-                        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                        setPasswordData({
+                          currentPassword: "",
+                          newPassword: "",
+                          confirmPassword: "",
+                        });
                       }}
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                     >
@@ -521,13 +685,18 @@ const AdminHome = () => {
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Reject Payment</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Reject Payment
+                </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  You are about to reject payment for <strong>{selectedTeam.teamName}</strong>. 
-                  Please provide a reason that will be sent to the user.
+                  You are about to reject payment for{" "}
+                  <strong>{selectedTeam.teamName}</strong>. Please provide a
+                  reason that will be sent to the user.
                 </p>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Rejection Reason *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Rejection Reason *
+                  </label>
                   <textarea
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
@@ -562,14 +731,35 @@ const AdminHome = () => {
 
         {/* Image Modal */}
         {showImageModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={closeImageModal}>
-            <div className="relative max-w-4xl max-h-full p-4" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+            onClick={closeImageModal}
+          >
+            <div
+              className="relative max-w-4xl max-h-full p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="bg-white p-2 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold">{selectedImage.title}</h3>
-                  <button onClick={closeImageModal} className="text-gray-600 hover:text-gray-900">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <h3 className="text-lg font-semibold">
+                    {selectedImage.title}
+                  </h3>
+                  <button
+                    onClick={closeImageModal}
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
