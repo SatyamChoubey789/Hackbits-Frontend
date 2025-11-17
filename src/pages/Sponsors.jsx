@@ -1,210 +1,119 @@
-import React from "react";
+
 
 const Sponsors = () => {
-  const sponsors = [
-    {
-      name: "TechCorp",
-      tier: "Platinum",
-      logo: "🏢",
-      description: "Leading technology solutions provider empowering innovation worldwide.",
-      benefits: ["$10,000 Prize Pool", "Internship Opportunities", "Mentorship Program"],
-    },
-    {
-      name: "InnovateLab",
-      tier: "Gold",
-      logo: "🔬",
-      description: "Research and development company focused on cutting-edge technologies.",
-      benefits: ["$5,000 Prize Pool", "Research Collaboration", "Tech Swag"],
-    },
-    {
-      name: "CodeAcademy",
-      tier: "Silver",
-      logo: "💻",
-      description: "Online learning platform making coding education accessible to everyone.",
-      benefits: ["Premium Courses", "Certification Programs", "Learning Resources"],
-    },
-    {
-      name: "StartupHub",
-      tier: "Bronze",
-      logo: "🚀",
-      description: "Incubator for emerging startups and entrepreneurial ventures.",
-      benefits: ["Incubation Program", "Networking Events", "Startup Resources"],
-    },
-    {
-      name: "CloudTech",
-      tier: "Bronze",
-      logo: "☁️",
-      description: "Cloud infrastructure provider supporting scalable applications.",
-      benefits: ["Cloud Credits", "Technical Support", "Infrastructure Resources"],
-    },
-    {
-      name: "DataViz",
-      tier: "Bronze",
-      logo: "📊",
-      description: "Data visualization and analytics platform for modern businesses.",
-      benefits: ["Analytics Tools", "Data Resources", "Visualization Software"],
-    },
-  ];
-
-  const getTierColor = (tier) => {
-    switch (tier) {
-      case "Platinum":
-        return "bg-gray-100 text-gray-800 border-gray-300";
-      case "Gold":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "Silver":
-        return "bg-gray-100 text-gray-600 border-gray-300";
-      case "Bronze":
-        return "bg-orange-100 text-orange-800 border-orange-300";
-      default:
-        return "bg-gray-100 text-gray-600 border-gray-300";
-    }
+  const sponsor = {
+    name: "Quick Heal",
+    logo: "/images/quickheal.png",
+    description:
+      "Quick Heal is India’s leading cybersecurity company, protecting millions of users with advanced security solutions and cutting-edge threat intelligence.",
+    tier: "Title Sponsor",
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pt-12 pb-20 px-4 sm:px-6 lg:px-8">
+
+      {/* Powered By Badge */}
+      <div className="w-full flex justify-center mb-10">
+        <div className="powered-badge bg-white border border-orange-400 text-orange-600 px-4 py-1 rounded-full text-sm font-semibold shadow-md">
+          🔥 Powered by Quick Heal
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+
+        {/* Heading */}
+        <div className="text-center mb-16 quickheal-fade">
           <h1 className="text-4xl font-bold text-gray-900 mb-6">
-            Our Sponsors
+            Our Official Sponsor
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We're grateful to our amazing sponsors who make this hackathon possible
-            and provide incredible opportunities for our participants.
+            We proudly present <strong>Quick Heal</strong> as the official sponsor
+            of our hackathon—empowering innovation and the future of cybersecurity talent.
           </p>
         </div>
 
-        {/* Sponsor Tiers */}
-        {/* <div className="mb-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
-            Sponsor Tiers
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {["Platinum", "Gold", "Silver", "Bronze"].map((tier) => (
-              <div
-                key={tier}
-                className={`card text-center border-2 ${getTierColor(tier)}`}
-              >
-                <h3 className="text-lg font-semibold mb-2">{tier} Sponsor</h3>
-                <p className="text-sm">
-                  {tier === "Platinum" && "Premier partnership with maximum visibility"}
-                  {tier === "Gold" && "Major partnership with significant benefits"}
-                  {tier === "Silver" && "Supporting partnership with great exposure"}
-                  {tier === "Bronze" && "Community partnership with valuable perks"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div> */}
+        {/* Sponsor Card */}
+        <div className="max-w-xl mx-auto quickheal-fade">
+          <div className="card text-center glow-border glow-hover transition-all duration-300">
 
-        {/* Sponsors Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sponsors.map((sponsor, index) => (
-            <div
-              key={index}
-              className="card hover:shadow-xl transition-shadow duration-300"
-            >
-              <div className="text-center mb-6">
-                <div className="text-6xl mb-4">{sponsor.logo}</div>
-                {/* <div className="mb-2">
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getTierColor(
-                      sponsor.tier
-                    )}`}
-                  >
-                    {sponsor.tier} Sponsor
-                  </span>
-                </div> */}
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {sponsor.name}
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  {sponsor.description}
-                </p>
-              </div>
+            {/* Logo */}
+            <div className="mb-6">
+              <img
+                src={sponsor.logo}
+                alt="Quick Heal Logo"
+                className="w-40 h-auto mx-auto mb-4 quickheal-fade drop-shadow-xl"
+              />
 
-              {/* <div className="border-t border-gray-200 pt-4">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                  Benefits for Participants:
-                </h4>
-                <ul className="space-y-2">
-                  {sponsor.benefits.map((benefit, benefitIndex) => (
-                    <li
-                      key={benefitIndex}
-                      className="text-sm text-gray-600 flex items-center"
-                    >
-                      <span className="w-2 h-2 bg-primary-600 rounded-full mr-2"></span>
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-              </div> */}
+              <h3 className="text-3xl font-semibold text-gray-900 mb-2">
+                {sponsor.name}
+              </h3>
+
+              <span className="inline-block px-4 py-1 mt-2 rounded-full text-sm font-medium bg-orange-100 text-orange-700 border border-orange-300">
+                {sponsor.tier}
+              </span>
+
+              <p className="text-gray-600 text-base mt-4 px-4 leading-relaxed">
+                {sponsor.description}
+              </p>
             </div>
-          ))}
-        </div>
-
-        {/* Become a Sponsor Section */}
-        <div className="mt-16 card text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Interested in Sponsoring?
-          </h2>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            Join our community of forward-thinking companies and help us create
-            an amazing experience for the next generation of innovators.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="mailto:sponsors@hackathon.edu"
-              className="btn-primary"
-            >
-              Contact Us
-            </a>
-            <a
-              href="/about"
-              className="btn-secondary"
-            >
-              Learn More
-            </a>
           </div>
         </div>
 
-        {/* Sponsor Benefits */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
-            Why Sponsor Our Hackathon?
+        {/* Why Quick Heal Section */}
+        <div className="mt-20 quickheal-fade">
+          <h2 className="text-2xl font-bold text-gray-900 mb-10 text-center">
+            Why Quick Heal Supports This Hackathon
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card text-center">
-              <div className="text-4xl mb-4">🎯</div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="card text-center glow-hover">
+              <div className="text-4xl mb-4">🔐</div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                Talent Acquisition
+                Cybersecurity Awareness
               </h3>
               <p className="text-gray-600">
-                Connect with top-tier students and emerging talent in technology
-                and innovation.
+                Quick Heal nurtures young minds in cybersecurity and promotes safe digital habits.
               </p>
             </div>
-            <div className="card text-center">
-              <div className="text-4xl mb-4">📢</div>
+
+            <div className="card text-center glow-hover">
+              <div className="text-4xl mb-4">💡</div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                Brand Visibility
+                Encouraging Innovation
               </h3>
               <p className="text-gray-600">
-                Increase your brand awareness among the tech community and
-                potential future employees.
+                Strong supporter of solving real-world problems through tech-driven creativity.
               </p>
             </div>
-            <div className="card text-center">
+
+            <div className="card text-center glow-hover">
               <div className="text-4xl mb-4">🤝</div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                Community Impact
+                Building Future Talent
               </h3>
               <p className="text-gray-600">
-                Support education and innovation while building meaningful
-                relationships with the community.
+                Enabling hands-on learning, mentorship, and exposure for future innovators.
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Contact Section */}
+        <div className="mt-20 card text-center quickheal-fade glow-hover">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Want to Collaborate With Us?
+          </h2>
+          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            Be part of our mission to strengthen the tech community. Reach out if
+            you'd like to collaborate for future events or sponsorships.
+          </p>
+
+          <a
+            href="mailto:hackbitsofficialteam@gmail.com"
+            className="btn-primary px-6 py-3 rounded-lg text-white font-medium"
+          >
+            Contact Organizers
+          </a>
         </div>
       </div>
     </div>

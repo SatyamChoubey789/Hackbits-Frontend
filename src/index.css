@@ -39,3 +39,47 @@
     @apply bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent;
   }
 }
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.quickheal-fade {
+  animation: fadeIn 1.2s ease forwards;
+}
+
+/* Glowing border */
+.glow-border {
+  border: 2px solid #f36c21;
+  box-shadow: 0px 0px 12px rgba(243, 108, 33, 0.5),
+              0px 0px 28px rgba(243, 108, 33, 0.25);
+}
+
+/* Glow on hover */
+.glow-hover:hover {
+  box-shadow: 0px 0px 18px rgba(243, 108, 33, 0.7),
+              0px 0px 32px rgba(243, 108, 33, 0.5);
+  transition: 0.3s ease;
+}
+
+/* Powered by badge animation */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0px 0px 10px rgba(243,108,33,0.6);
+  }
+  50% {
+    box-shadow: 0px 0px 18px rgba(243,108,33,0.9);
+  }
+}
+
+.powered-badge {
+  animation: pulseGlow 2s infinite;
+}
