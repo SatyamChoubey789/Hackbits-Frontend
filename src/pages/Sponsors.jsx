@@ -28,7 +28,7 @@ const Sponsors = () => {
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             We proudly present <strong>Quick Heal</strong> as the official sponsor
-            of our hackathon—empowering innovation and the future of cybersecurity talent.
+            of our hackathon empowering innovation and the future of cybersecurity talent.
           </p>
         </div>
 
