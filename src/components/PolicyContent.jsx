@@ -4,7 +4,6 @@ export const PolicyContent = () => {
     return (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
             <section className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-2xl font-semibold mb-3">Privacy Policy</h2>
                 <p className="text-gray-700 leading-relaxed">
                     We are committed to protecting your privacy. We collect only the necessary 
                     information to provide our services and do not share your data with third parties 

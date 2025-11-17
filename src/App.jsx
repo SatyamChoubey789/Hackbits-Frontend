@@ -24,6 +24,7 @@ import ProblemStatements from "./pages/ProblemStatements";
 import Sponsors from "./pages/Sponsors";
 import QRScanner from "./pages/QRScanner";
 import { PolicyPage } from "./pages/policypage";
+import { Footer } from "./components/Footer";
 
 function App() {
   return (
@@ -110,6 +111,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
+          <Footer />
         </div>
       </Router>
     </AuthProvider>
