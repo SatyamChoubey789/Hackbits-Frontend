@@ -183,7 +183,7 @@ const RazorpayPaymentButton = ({ team, onClose, onSuccess }) => {
             <p className="text-sm text-gray-500">
               Having trouble? Contact support at{' '}
               <a href="mailto:support@hackathon.com" className="text-primary-600 hover:underline">
-                support@hackathon.com
+               hackbitsofficialteam@gmail.com
               </a>
             </p>
           </div>

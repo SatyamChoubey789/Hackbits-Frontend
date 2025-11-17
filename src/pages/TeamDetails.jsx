@@ -132,7 +132,7 @@ const TeamDetails = () => {
 
   const getPaymentAmount = () => {
     const amounts = {
-      Solo: 1
+      Solo: 79,
     };
     return amounts[team?.teamSize] || 500;
   };
