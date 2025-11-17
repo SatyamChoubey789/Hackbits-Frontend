@@ -1,6 +1,6 @@
 
 
-const PolicyContent = () => {
+export const PolicyContent = () => {
     return (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
             <section className="bg-white p-6 rounded-lg shadow">
@@ -33,4 +33,3 @@ const PolicyContent = () => {
     );
 }
 
-export default PolicyContent;

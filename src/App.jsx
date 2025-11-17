@@ -23,7 +23,7 @@ import About from "./pages/About";
 import ProblemStatements from "./pages/ProblemStatements";
 import Sponsors from "./pages/Sponsors";
 import QRScanner from "./pages/QRScanner";
-import PolicyPage from "./pages/policypage";
+import { PolicyPage } from "./pages/policypage";
 
 function App() {
   return (
