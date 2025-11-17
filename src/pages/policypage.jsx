@@ -3,7 +3,7 @@
 
 import PolicyContent from '../components/PolicyContent';
 import Navbar from '../components/Navbar';
-import './policypage.css';
+
 
 const PolicyPage = () => {
     return (
